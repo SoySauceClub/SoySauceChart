@@ -19,7 +19,7 @@ class GraphHtmlGenerator(object):
         template = env.get_template(self.template_name)
         result_html = template.render(PRICE_DATA=price_json_data, GRAPH_SETUP_DATA=graph_setup_data)
         GraphHtmlGenerator._save_html(export_path, result_html)
-        webbrowser.open('file://' + os.path.realpath(export_path))
+        # webbrowser.open('file://' + os.path.realpath(export_path))
 
     @staticmethod
     def _save_html(file_name, result_html):

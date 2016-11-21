@@ -8,16 +8,18 @@ from sschart.graph_html_generator import GraphHtmlGenerator
 if __name__ == '__main__':
 
     #you can construct whatever you want into pandas dataframe
-    price_df = web.get_data_yahoo('EWZ', '10/28/2015', '10/31/2016')
+    target_price = r'c:\temp\1minute\price\AAPL.csv'
+    # price_df = web.get_data_yahoo('EWZ', '10/28/2015', '10/31/2016')
+    price_df = pd.read_csv(target_price, parse_dates=True, index_col=0)
     sLength = len(price_df['Open'])
     price_df['LR'] = pd.Series(np.random.randn(sLength), index=price_df.index)
 
     #define the series that you want here, the pandas data frame need to contain the headers
-    series1 = GraphSeries(name='OHLC', headers=['Date', 'Open', 'High', 'Low', 'Close'], seriestype='candlestick')
-    series2 = GraphSeries(name='Volumn', headers=['Date', 'Volume'], seriestype='column', yAxis=1)
-    series3 = GraphSeries(name='LR-line', headers=['Date', 'LR'], seriestype='line')
-    series4 = GraphSeries(name='AreaRange', headers=['Date', 'High', 'Low'], seriestype='arearange')
-    graphSetUp = [series1, series2, series3, series4]
+    series1 = GraphSeries(name='OHLC', headers=['DateTime', 'Open', 'High', 'Low', 'Close'], seriestype='candlestick')
+    # series2 = GraphSeries(name='Volumn', headers=['Date', 'Volume'], seriestype='column', yAxis=1)
+    # series3 = GraphSeries(name='LR-line', headers=['Date', 'LR'], seriestype='line')
+    # series4 = GraphSeries(name='AreaRange', headers=['Date', 'High', 'Low'], seriestype='arearange')
+    graphSetUp = [series1]
 
     graphSetUpJson = json.dumps([ob.__dict__ for ob in graphSetUp])
     dataInJson = price_df.reset_index().to_json(orient='records')
