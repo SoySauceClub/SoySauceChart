@@ -15,17 +15,17 @@ if __name__ == '__main__':
     price_df['LR'] = pd.Series(np.random.randn(sLength), index=price_df.index)
 
     #define the series that you want here, the pandas data frame need to contain the headers
-    series1 = GraphSeries(name='OHLC', headers=['DateTime', 'Open', 'High', 'Low', 'Close'], seriestype='candlestick')
+    series1 = GraphSeries(name='OHLC', headers=['DateTime', 'Open', 'High', 'Low', 'Close'], seriestype='ohlc')
     # series2 = GraphSeries(name='Volumn', headers=['Date', 'Volume'], seriestype='column', yAxis=1)
-    # series3 = GraphSeries(name='LR-line', headers=['Date', 'LR'], seriestype='line')
+    series3 = GraphSeries(name='LR-line', headers=['DateTime', 'LR'], seriestype='line')
     # series4 = GraphSeries(name='AreaRange', headers=['Date', 'High', 'Low'], seriestype='arearange')
-    graphSetUp = [series1]
+    graphSetUp = [series1, series3]
 
     graphSetUpJson = json.dumps([ob.__dict__ for ob in graphSetUp])
     dataInJson = price_df.reset_index().to_json(orient='records')
     print(dataInJson)
 	#change this template_folder variable to the current folder
-    template_folder = r'E:\GitHub\SoySauceChart\sschart'
+    template_folder = r'C:\github\SoySauceChart\sschart'
     template_name = 'Chart-template.html'
 	#change this to whatever folder that you want to store the result html
     export_path = r'C:\temp\chart_result\test123.html'

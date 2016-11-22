@@ -10,12 +10,14 @@
     </head>
     <body>
 		
-<div id="container" style="height: 600px; min-width: 310px"></div>
-<button id="button" class="autocompare">Next</button>
+<div id="container" style="height: 980px; min-width: 310px"></div>
+<!--<button id="button" class="autocompare">Next</button>-->
 <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
 <script src="https://code.highcharts.com/stock/highstock.js"></script>
 <script src="https://code.highcharts.com/stock/highcharts-more.js"></script>
 <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+<script src="https://rawgithub.com/RolandBanguiran/highcharts-scalable-yaxis/master/scalable-yaxis.js"></script>
+<!--<script src="https://rawgithub.com/highslide-software/value-in-legend/master/value-in-legend.js"></script>-->
 <script src="data.js"></script>
 
 <script>
@@ -26,9 +28,13 @@ $(function () {
 
     var graphSeries = [];
 
-	for(var i = 0; i < graphSetup.length; i++)
-	{	    
-		graphSeries.push({type: graphSetup[i].seriestype, name: graphSetup[i].name, data: [], yAxis: graphSetup[i].yAxis});
+	for(var i = 0; i < graphSetup.length; i++) {
+		var currentSeries = {type: graphSetup[i].seriestype, name: graphSetup[i].name, data: [], yAxis: graphSetup[i].yAxis};
+
+		if(currentSeries.type === 'ohlc') {
+			currentSeries.dataGrouping = {enabled : false};
+		}
+		graphSeries.push(currentSeries);
 	}
 
 	for(var i = 0; i < data.length; i++)
@@ -65,8 +71,16 @@ $(function () {
                 scrollbar: {
                     enabled: true
                 },
-                height: '60%',
+                //in my original code, I have the second y-axis for the volumne data
+                //so only 60% of the height was assigned for the line chart part
+                //comment this out would give all the height for the line chart
+                //height: '60%',
+                //
                 lineWidth: 2,
+                //http://api.highcharts.com/highcharts/xAxis.tickInterval
+                //check the function documentation!!!!!!
+                tickInterval: 0.02,
+				scalable: true
             }],
 
             series: graphSeries
