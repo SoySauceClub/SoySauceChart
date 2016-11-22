@@ -1,23 +1,24 @@
-import json
+import simplejson as json
 import pandas as pd
 import pandas_datareader.data as web
 import numpy as np
+from factor.factor_builder import FactorBuilder
 from sschart.graph_series import GraphSeries
 from sschart.graph_html_generator import GraphHtmlGenerator
 
 if __name__ == '__main__':
 
     #you can construct whatever you want into pandas dataframe
-    target_price = r'c:\temp\1minute\price\AAPL.csv'
+    target_price = r'c:\temp\1minute\price\AAPL - Copy.csv'
     # price_df = web.get_data_yahoo('EWZ', '10/28/2015', '10/31/2016')
     price_df = pd.read_csv(target_price, parse_dates=True, index_col=0)
     sLength = len(price_df['Open'])
-    price_df['LR'] = pd.Series(np.random.randn(sLength), index=price_df.index)
+    price_df['DailyOpen'] = FactorBuilder.get_daily_open(price_df)
 
     #define the series that you want here, the pandas data frame need to contain the headers
     series1 = GraphSeries(name='OHLC', headers=['DateTime', 'Open', 'High', 'Low', 'Close'], seriestype='ohlc')
     # series2 = GraphSeries(name='Volumn', headers=['Date', 'Volume'], seriestype='column', yAxis=1)
-    series3 = GraphSeries(name='LR-line', headers=['DateTime', 'LR'], seriestype='line')
+    series3 = GraphSeries(name='DailyOpen-line', headers=['DateTime', 'DailyOpen'], seriestype='line')
     # series4 = GraphSeries(name='AreaRange', headers=['Date', 'High', 'Low'], seriestype='arearange')
     graphSetUp = [series1, series3]
 
