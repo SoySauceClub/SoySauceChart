@@ -41,6 +41,13 @@ if __name__ == '__main__':
 
     graphSetUpJson = json.dumps([ob.__dict__ for ob in graphSetUp])
     dataInJson = price_df.reset_index().to_json(orient='records')
+
+    with open('set_up.json', 'w') as f:
+        f.write(graphSetUpJson)
+
+    with open('data.json', 'w') as f:
+        f.write(dataInJson)
+
     print(dataInJson)
 
     template_folder = r'C:\github\SoySauceChart\sschart'

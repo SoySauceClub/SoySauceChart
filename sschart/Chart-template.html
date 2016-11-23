@@ -37,7 +37,7 @@ $(function () {
 		}
 
 		if(currentSeries.type === 'arearange') {
-			currentSeries.fillOpacity = 0.3
+			currentSeries.fillOpacity = 0.2
 		}
 
 		graphSeries.push(currentSeries);
@@ -65,7 +65,11 @@ $(function () {
             title: {
                 text: 'Price Data'
             },
-
+			legend: {
+           		enabled: true,
+           		layout: 'horizontal',
+           		maxHeight: 100
+          	},
             yAxis: [{
                 labels: {
                     align: 'right',
