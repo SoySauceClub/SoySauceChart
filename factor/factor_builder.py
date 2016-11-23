@@ -12,3 +12,9 @@ class FactorBuilder(object):
             price_list.append(None)
         return price_list
 
+    @staticmethod
+    def get_bollinger_band(df, window=30, numsd=2):
+        avg_ = df['Close'].rolling(window=window).mean()
+        std_ = df['Close'].rolling(window=window).std()
+        return avg_, avg_ + numsd*std_, avg_ - numsd*std_
+
