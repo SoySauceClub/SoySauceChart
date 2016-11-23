@@ -31,9 +31,15 @@ $(function () {
 	for(var i = 0; i < graphSetup.length; i++) {
 		var currentSeries = {type: graphSetup[i].seriestype, name: graphSetup[i].name, data: [], yAxis: graphSetup[i].yAxis};
 
+		currentSeries.zIndex = i
 		if(currentSeries.type === 'ohlc') {
 			currentSeries.dataGrouping = {enabled : false};
 		}
+
+		if(currentSeries.type === 'arearange') {
+			currentSeries.fillOpacity = 0.3
+		}
+
 		graphSeries.push(currentSeries);
 	}
 
@@ -71,14 +77,7 @@ $(function () {
                 scrollbar: {
                     enabled: true
                 },
-                //in my original code, I have the second y-axis for the volumne data
-                //so only 60% of the height was assigned for the line chart part
-                //comment this out would give all the height for the line chart
-                //height: '60%',
-                //
                 lineWidth: 2,
-                //http://api.highcharts.com/highcharts/xAxis.tickInterval
-                //check the function documentation!!!!!!
                 tickInterval: 0.02,
 				scalable: true
             }],
