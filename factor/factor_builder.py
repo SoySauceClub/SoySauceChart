@@ -37,4 +37,9 @@ class FactorBuilder(object):
         temp_df['HybridFrog'] = temp_df['FrogBox'] * hybrid_multiplier
         return temp_df['RangeStat'], temp_df['HybridFrog'], temp_df['FrogBox']
 
-
+    @staticmethod
+    def get_regression_line_info(df, ticker, target_folder=r'C:\temp\1minute\factor'):
+        file_path = os.path.join(target_folder, ticker + '.csv')
+        fdf = pd.read_csv(file_path, parse_dates=True, index_col=0)
+        sliced_fdf = fdf[fdf.index.isin(df.index)]
+        return sliced_fdf['RegLine10'], sliced_fdf['RegLine30'], sliced_fdf['RegLine90'], sliced_fdf['RegLine270']

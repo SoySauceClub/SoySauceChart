@@ -8,7 +8,7 @@ from sschart.graph_html_generator import GraphHtmlGenerator
 
 if __name__ == '__main__':
     start_date = '20150101'
-    end_date = '20150201'
+    end_date = '20150105'
     ticker = 'AAPL'
 
     target_price = r'c:\temp\1minute\price\{0}.csv'.format(ticker)
@@ -29,29 +29,39 @@ if __name__ == '__main__':
     price_df['RangeStatDown'] = price_df['DailyOpen'] - price_df['RangeStat']
     price_df['HybridFrogUp'] = price_df['DailyOpen'] + price_df['HybridFrog']
     price_df['HybridFrogDown'] = price_df['DailyOpen'] - price_df['HybridFrog']
+    price_df['RegLine10'], price_df['RegLine30'],price_df['RegLine90'], price_df['RegLine270'] = FactorBuilder\
+        .get_regression_line_info(original_df, ticker)
 
     #define the series that you want here, the pandas data frame need to contain the headers
-    series1 = GraphSeries(name='OHLC', headers=['DateTime', 'Open', 'High', 'Low', 'Close'], seriestype='ohlc')
-    series2 = GraphSeries(name='MA30', headers=['DateTime', 'MA30'], seriestype='line')
-    series3 = GraphSeries(name='DailyOpen-line', headers=['DateTime', 'DailyOpen'], seriestype='line')
-    series4 = GraphSeries(name='BB1', headers=['DateTime', 'BB30_1U', 'BB30_1B'], seriestype='arearange')
-    series5 = GraphSeries(name='BB2', headers=['DateTime', 'BB30_2U', 'BB30_2B'], seriestype='arearange')
-    series6 = GraphSeries(name='BB3', headers=['DateTime', 'BB30_3U', 'BB30_3B'], seriestype='arearange')
-    series7 = GraphSeries(name='RangeStatUp', headers=['DateTime', 'DailyOpen', 'RangeStatUp'], seriestype='arearange')
-    series8 = GraphSeries(name='RangeStatDown', headers=['DateTime', 'DailyOpen', 'RangeStatDown'], seriestype='arearange')
-    series9 = GraphSeries(name='HybridBoxUp', headers=['DateTime', 'DailyOpen', 'HybridFrogUp'], seriestype='arearange')
-    series10 = GraphSeries(name='HybridBoxDown', headers=['DateTime', 'DailyOpen', 'HybridFrogDown'], seriestype='arearange')
+    ohlc = GraphSeries(name='OHLC', headers=['DateTime', 'Open', 'High', 'Low', 'Close'], seriestype='ohlc')
+    ma30 = GraphSeries(name='MA30', headers=['DateTime', 'MA30'], seriestype='line')
+    daily_open = GraphSeries(name='DailyOpen', headers=['DateTime', 'DailyOpen'], seriestype='line')
+    bb_1_std = GraphSeries(name='BB1', headers=['DateTime', 'BB30_1U', 'BB30_1B'], seriestype='arearange')
+    bb_2_std = GraphSeries(name='BB2', headers=['DateTime', 'BB30_2U', 'BB30_2B'], seriestype='arearange')
+    bb_3_std = GraphSeries(name='BB3', headers=['DateTime', 'BB30_3U', 'BB30_3B'], seriestype='arearange')
+    rs_up = GraphSeries(name='RangeStatUp', headers=['DateTime', 'DailyOpen', 'RangeStatUp'], seriestype='arearange')
+    rs_down = GraphSeries(name='RangeStatDown', headers=['DateTime', 'DailyOpen', 'RangeStatDown'], seriestype='arearange')
+    hf_up = GraphSeries(name='HybridBoxUp', headers=['DateTime', 'DailyOpen', 'HybridFrogUp'], seriestype='arearange')
+    hf_down = GraphSeries(name='HybridBoxDown', headers=['DateTime', 'DailyOpen', 'HybridFrogDown'], seriestype='arearange')
+    rl_10 = GraphSeries(name='RegLine10', headers=['DateTime', 'RegLine10'], seriestype='line')
+    rl_30 = GraphSeries(name='RegLine30', headers=['DateTime', 'RegLine30'], seriestype='line')
+    rl_90 = GraphSeries(name='RegLine90', headers=['DateTime', 'RegLine90'], seriestype='line')
+    rl_270 = GraphSeries(name='RegLine270', headers=['DateTime', 'RegLine270'], seriestype='line')
     graphSetUp = [
-        series1,
-        series2,
-        series3,
-        series4,
-        series5,
-        series6,
-        series7,
-        series8,
-        series9,
-        series10
+        ohlc,
+        ma30,
+        daily_open,
+        bb_1_std,
+        bb_2_std,
+        bb_3_std,
+        rs_up,
+        rs_down,
+        hf_up,
+        hf_down,
+        rl_10,
+        rl_30,
+        rl_90,
+        rl_270
     ]
 
     graphSetUpJson = json.dumps([ob.__dict__ for ob in graphSetUp])
