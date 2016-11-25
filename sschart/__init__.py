@@ -11,6 +11,8 @@ if __name__ == '__main__':
     end_date = '20150105'
     ticker = 'AAPL'
 
+    ohlc_style = {'dataGrouping': {'enabled': False}}
+    area_range_style = {'fillOpacity ': 0.2}
     target_price = r'c:\temp\1minute\price\{0}.csv'.format(ticker)
     price_df = pd.read_csv(target_price, parse_dates=True, index_col=0)
     price_df = price_df.loc[price_df.index >= pd.to_datetime(start_date)]
@@ -33,16 +35,16 @@ if __name__ == '__main__':
         .get_regression_line_info(original_df, ticker)
 
     #define the series that you want here, the pandas data frame need to contain the headers
-    ohlc = GraphSeries(name='OHLC', headers=['DateTime', 'Open', 'High', 'Low', 'Close'], seriestype='ohlc')
+    ohlc = GraphSeries(name='OHLC', headers=['DateTime', 'Open', 'High', 'Low', 'Close'], seriestype='ohlc', style_setup=ohlc_style)
     ma30 = GraphSeries(name='MA30', headers=['DateTime', 'MA30'], seriestype='line')
     daily_open = GraphSeries(name='DailyOpen', headers=['DateTime', 'DailyOpen'], seriestype='line')
-    bb_1_std = GraphSeries(name='BB1', headers=['DateTime', 'BB30_1U', 'BB30_1B'], seriestype='arearange')
-    bb_2_std = GraphSeries(name='BB2', headers=['DateTime', 'BB30_2U', 'BB30_2B'], seriestype='arearange')
-    bb_3_std = GraphSeries(name='BB3', headers=['DateTime', 'BB30_3U', 'BB30_3B'], seriestype='arearange')
-    rs_up = GraphSeries(name='RangeStatUp', headers=['DateTime', 'DailyOpen', 'RangeStatUp'], seriestype='arearange')
-    rs_down = GraphSeries(name='RangeStatDown', headers=['DateTime', 'DailyOpen', 'RangeStatDown'], seriestype='arearange')
-    hf_up = GraphSeries(name='HybridBoxUp', headers=['DateTime', 'DailyOpen', 'HybridFrogUp'], seriestype='arearange')
-    hf_down = GraphSeries(name='HybridBoxDown', headers=['DateTime', 'DailyOpen', 'HybridFrogDown'], seriestype='arearange')
+    bb_1_std = GraphSeries(name='BB1', headers=['DateTime', 'BB30_1U', 'BB30_1B'], seriestype='arearange', style_setup=area_range_style)
+    bb_2_std = GraphSeries(name='BB2', headers=['DateTime', 'BB30_2U', 'BB30_2B'], seriestype='arearange', style_setup=area_range_style)
+    bb_3_std = GraphSeries(name='BB3', headers=['DateTime', 'BB30_3U', 'BB30_3B'], seriestype='arearange', style_setup=area_range_style)
+    rs_up = GraphSeries(name='RangeStatUp', headers=['DateTime', 'DailyOpen', 'RangeStatUp'], seriestype='arearange', style_setup=area_range_style)
+    rs_down = GraphSeries(name='RangeStatDown', headers=['DateTime', 'DailyOpen', 'RangeStatDown'], seriestype='arearange', style_setup=area_range_style)
+    hf_up = GraphSeries(name='HybridBoxUp', headers=['DateTime', 'DailyOpen', 'HybridFrogUp'], seriestype='arearange', style_setup=area_range_style)
+    hf_down = GraphSeries(name='HybridBoxDown', headers=['DateTime', 'DailyOpen', 'HybridFrogDown'], seriestype='arearange', style_setup=area_range_style)
     rl_10 = GraphSeries(name='RegLine10', headers=['DateTime', 'RegLine10'], seriestype='line')
     rl_30 = GraphSeries(name='RegLine30', headers=['DateTime', 'RegLine30'], seriestype='line')
     rl_90 = GraphSeries(name='RegLine90', headers=['DateTime', 'RegLine90'], seriestype='line')

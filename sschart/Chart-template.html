@@ -31,13 +31,16 @@ $(function () {
 	for(var i = 0; i < graphSetup.length; i++) {
 		var currentSeries = {type: graphSetup[i].seriestype, name: graphSetup[i].name, data: [], yAxis: graphSetup[i].yAxis};
 
-		currentSeries.zIndex = i
-		if(currentSeries.type === 'ohlc') {
-			currentSeries.dataGrouping = {enabled : false};
-		}
-
-		if(currentSeries.type === 'arearange') {
-			currentSeries.fillOpacity = 0.2
+		currentSeries.zIndex = i;
+		//setup the series style
+		if(graphSetup[i].style_setup != null)
+		{
+			for(var propertyName in graphSetup[i].style_setup){
+				if (graphSetup[i].style_setup.hasOwnProperty(propertyName)) {
+					currentSeries[propertyName] = graphSetup[i].style_setup[propertyName];
+				}
+				
+			}
 		}
 
 		graphSeries.push(currentSeries);
