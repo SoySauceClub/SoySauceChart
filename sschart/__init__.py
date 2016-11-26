@@ -79,7 +79,7 @@ if __name__ == '__main__':
 
     template_folder = r'C:\github\SoySauceChart\sschart'
     # template_folder = r'I:\Projects\SoySauceChart\sschart'
-    template_name = 'Chart-template.html'
+    template_name = r'I:\Projects\SoySauceChart\sschart\Chart-template.html'
 	#change this to whatever folder that you want to store the result html
     export_path = r'C:\temp\chart_result\test123.html'
 
