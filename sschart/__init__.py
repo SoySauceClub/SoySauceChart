@@ -1,14 +1,19 @@
 import simplejson as json
 import pandas as pd
-import pandas_datareader.data as web
 import numpy as np
+import os
 from factor.factor_builder import FactorBuilder
 from sschart.graph_series import GraphSeries
 from sschart.graph_html_generator import GraphHtmlGenerator
 
 if __name__ == '__main__':
-    start_date = '20150101'
-    end_date = '20150105'
+    one_minute_price_folder = r'.\sample_data\1minute\price'
+    one_minute_factor_folder = r'.\sample_data\1minute\factor'
+    daily_price_folder = r'.\sample_data\daily\price'
+    daily_factor_folder = r'.\sample_data\daily\factor'
+
+    start_date = '20161109'
+    end_date = '20161123'
     ticker = 'AAPL'
 
     #style setup
@@ -16,7 +21,7 @@ if __name__ == '__main__':
     ohlc_style = {'dataGrouping': {'enabled': False}}
     area_range_style = {'fillOpacity ': 0.2}
 
-    target_price = r'c:\temp\1minute\price\{0}.csv'.format(ticker)
+    target_price = one_minute_price_folder +  r'\{0}.csv'.format(ticker)
     price_df = pd.read_csv(target_price, parse_dates=True, index_col=0)
     price_df = price_df.loc[price_df.index >= pd.to_datetime(start_date)]
     price_df = price_df.loc[price_df.index <= pd.to_datetime(end_date)]
@@ -28,14 +33,15 @@ if __name__ == '__main__':
     price_df['RangeStat'], price_df['HybridFrog'], price_df['FrogBox'] = FactorBuilder.get_frog_info(
         original_df,
         ticker,
-        hybrid_multiplier=0.7
+        hybrid_multiplier=0.7,
+        target_folder=daily_factor_folder
     )
     price_df['RangeStatUp'] = price_df['DailyOpen'] + price_df['RangeStat']
     price_df['RangeStatDown'] = price_df['DailyOpen'] - price_df['RangeStat']
     price_df['HybridFrogUp'] = price_df['DailyOpen'] + price_df['HybridFrog']
     price_df['HybridFrogDown'] = price_df['DailyOpen'] - price_df['HybridFrog']
     price_df['RegLine10'], price_df['RegLine30'],price_df['RegLine90'], price_df['RegLine270'] = FactorBuilder\
-        .get_regression_line_info(original_df, ticker)
+        .get_regression_line_info(original_df, ticker, target_folder=one_minute_factor_folder)
 
     #define the series that you want here, the pandas data frame need to contain the headers
     ohlc = GraphSeries(name='OHLC', headers=['DateTime', 'Open', 'High', 'Low', 'Close'], seriestype='ohlc', style_setup=ohlc_style)
@@ -81,11 +87,10 @@ if __name__ == '__main__':
 
     print(dataInJson)
 
-    template_folder = r'C:\github\SoySauceChart\sschart'
-    # template_folder = r'I:\Projects\SoySauceChart\sschart'
-    template_name = r'I:\Projects\SoySauceChart\sschart\Chart-template.html'
+    template_folder = r'.\sschart'
+    template_name = r'Chart-template.html'
 	#change this to whatever folder that you want to store the result html
-    export_path = r'C:\temp\chart_result\test123.html'
+    export_path = r'test123.html'
 
     generator = GraphHtmlGenerator(template_folder=template_folder, template_name=template_name)
     generator.generate_html_with_json(price_json_data=dataInJson, graph_setup_data=graphSetUpJson,graph_global_setup=globalSetUpJson, export_path=export_path)
