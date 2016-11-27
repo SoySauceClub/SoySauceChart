@@ -11,8 +11,11 @@ if __name__ == '__main__':
     end_date = '20150105'
     ticker = 'AAPL'
 
+    #style setup
+    graph_global_setup = {'title': ticker + ' from  ' + start_date + ' to ' + end_date, 'yAxis': [{'title': 'Price'}]}
     ohlc_style = {'dataGrouping': {'enabled': False}}
     area_range_style = {'fillOpacity ': 0.2}
+
     target_price = r'c:\temp\1minute\price\{0}.csv'.format(ticker)
     price_df = pd.read_csv(target_price, parse_dates=True, index_col=0)
     price_df = price_df.loc[price_df.index >= pd.to_datetime(start_date)]
@@ -68,6 +71,7 @@ if __name__ == '__main__':
 
     graphSetUpJson = json.dumps([ob.__dict__ for ob in graphSetUp])
     dataInJson = price_df.reset_index().to_json(orient='records')
+    globalSetUpJson = json.dumps(graph_global_setup)
 
     with open('set_up.json', 'w') as f:
         f.write(graphSetUpJson)
@@ -84,5 +88,5 @@ if __name__ == '__main__':
     export_path = r'C:\temp\chart_result\test123.html'
 
     generator = GraphHtmlGenerator(template_folder=template_folder, template_name=template_name)
-    generator.generate_html_with_json(price_json_data=dataInJson, graph_setup_data=graphSetUpJson, export_path=export_path)
+    generator.generate_html_with_json(price_json_data=dataInJson, graph_setup_data=graphSetUpJson,graph_global_setup=globalSetUpJson, export_path=export_path)
     print('Done!')
