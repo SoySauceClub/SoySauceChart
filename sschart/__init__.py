@@ -11,13 +11,28 @@ if __name__ == '__main__':
     one_minute_factor_folder = r'.\sample_data\1minute\factor'
     daily_price_folder = r'.\sample_data\daily\price'
     daily_factor_folder = r'.\sample_data\daily\factor'
-
+    trade_file = r'.\sample_data\AAPL_Trade.csv'
     start_date = '20161109'
     end_date = '20161123'
     ticker = 'AAPL'
 
+    #################### comment this area out if you run sample data
+    #
+    one_minute_price_folder = r'C:\temp\1minute\price'
+    one_minute_factor_folder = r'C:\temp\1minute\factor'
+    daily_price_folder = r'C:\temp\daily\price'
+    daily_factor_folder = r'C:\temp\daily\factor'
+    trade_file = r'.\sample_data\AAPL_Trade.csv'
+    start_date = '20160109'
+    end_date = '20160123'
+    ticker = 'AAPL'
+
+
     #style setup
-    graph_global_setup = {'title': ticker + ' from  ' + start_date + ' to ' + end_date, 'yAxis': [{'title': 'Price'}]}
+    graph_global_setup = {
+        'title': ticker + ' from  ' + start_date + ' to ' + end_date,
+        'yAxis': [{'title': 'Price'}]
+    }
     ohlc_style = {'dataGrouping': {'enabled': False}}
     area_range_style = {'fillOpacity ': 0.2}
 
@@ -42,6 +57,7 @@ if __name__ == '__main__':
     price_df['HybridFrogDown'] = price_df['DailyOpen'] - price_df['HybridFrog']
     price_df['RegLine10'], price_df['RegLine30'],price_df['RegLine90'], price_df['RegLine270'] = FactorBuilder\
         .get_regression_line_info(original_df, ticker, target_folder=one_minute_factor_folder)
+    price_df['LongPrice'], price_df['ShortPrice'] = FactorBuilder.get_trade_info(original_df, trade_file)
 
     #define the series that you want here, the pandas data frame need to contain the headers
     ohlc = GraphSeries(name='OHLC', headers=['DateTime', 'Open', 'High', 'Low', 'Close'], seriestype='ohlc', style_setup=ohlc_style)
@@ -58,21 +74,25 @@ if __name__ == '__main__':
     rl_30 = GraphSeries(name='RegLine30', headers=['DateTime', 'RegLine30'], seriestype='line')
     rl_90 = GraphSeries(name='RegLine90', headers=['DateTime', 'RegLine90'], seriestype='line')
     rl_270 = GraphSeries(name='RegLine270', headers=['DateTime', 'RegLine270'], seriestype='line')
+    long_trade = GraphSeries(name='Long', headers=['DateTime', 'LongPrice'], seriestype='scatter')
+    short_trade = GraphSeries(name='Short', headers=['DateTime', 'ShortPrice'], seriestype='scatter')
     graphSetUp = [
-        ohlc,
-        ma30,
-        daily_open,
-        bb_1_std,
-        bb_2_std,
-        bb_3_std,
-        rs_up,
-        rs_down,
-        hf_up,
-        hf_down,
-        rl_10,
-        rl_30,
-        rl_90,
-        rl_270
+        ohlc
+        ,ma30
+        ,daily_open
+        # ,bb_1_std
+        # ,bb_2_std
+        # ,bb_3_std
+        ,rs_up
+        ,rs_down
+        ,hf_up
+        ,hf_down
+        # ,rl_10
+        # ,rl_30
+        # ,rl_90
+        # ,rl_270
+        ,long_trade
+        ,short_trade
     ]
 
     graphSetUpJson = json.dumps([ob.__dict__ for ob in graphSetUp])

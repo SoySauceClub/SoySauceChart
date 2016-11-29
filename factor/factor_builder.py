@@ -1,6 +1,8 @@
 import os
 import pandas as pd
+import numpy as np
 import datetime
+
 
 class FactorBuilder(object):
     def __init__(self):
@@ -43,3 +45,20 @@ class FactorBuilder(object):
         fdf = pd.read_csv(file_path, parse_dates=True, index_col=0)
         sliced_fdf = fdf[fdf.index.isin(df.index)]
         return sliced_fdf['RegLine10'], sliced_fdf['RegLine30'], sliced_fdf['RegLine90'], sliced_fdf['RegLine270']
+
+    @staticmethod
+    def get_trade_info(df, trade_path):
+        tdf = pd.read_csv(trade_path, parse_dates=False)
+        tdf['EntryDateTime'] = pd.to_datetime(tdf['EntryDate'] + ' ' + tdf['EntryTime'])
+        tdf['ExitDateTime'] = pd.to_datetime(tdf['ExitDate'] + ' ' + tdf['ExitTime'])
+        tdf['LongDateTime'] = np.where(tdf['Direction'] == 'LONG', tdf['EntryDateTime'], tdf['ExitDateTime'])
+        tdf['LongPrice'] = np.where(tdf['Direction'] == 'LONG', tdf['EntryPrice'], tdf['ExitPrice'])
+        tdf['ShortDateTime'] = np.where(tdf['Direction'] == 'SHORT', tdf['EntryDateTime'], tdf['ExitDateTime'])
+        tdf['ShortPrice'] = np.where(tdf['Direction'] == 'SHORT', tdf['EntryPrice'], tdf['ExitPrice'])
+        df['LongPrice'] = np.nan
+        df['ShortPrice'] = np.nan
+        buy_tdf = tdf[tdf['LongDateTime'].isin(df.index)]
+        sell_tdf = tdf[tdf['ShortDateTime'].isin(df.index)]
+        df.loc[df.index.isin(buy_tdf['LongDateTime']), 'LongPrice'] = buy_tdf['LongPrice'].tolist()
+        df.loc[df.index.isin(sell_tdf['ShortDateTime']), 'ShortPrice'] = buy_tdf['ShortPrice'].tolist()
+        return df['LongPrice'], df['ShortPrice']
