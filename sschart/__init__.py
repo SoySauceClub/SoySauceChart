@@ -1,117 +1,37 @@
-import simplejson as json
-import pandas as pd
-import numpy as np
-import os
-from factor.factor_builder import FactorBuilder
-from sschart.graph_series import GraphSeries
+import click
+from sschart.graph_series import GraphSeries, GraphSetup
 from sschart.graph_html_generator import GraphHtmlGenerator
+from sschart.chart_style import ChartStyle
+
+
+@click.command()
+@click.option('--ticker', default='AAPL', help='Ticker Symbol')
+@click.option('--data_folder', default=r'.\sample_data', help='The minute bar folder root')
+@click.option('--trade_file', default=None, help='The trade file that shows the actual trades')
+@click.option('--out_folder', default=r'.', help='The folder that contains the output')
+@click.option('--subchart/--non-subchart', default=False, help='Enable weekly range plot if needed')
+@click.option('--start_date', default='20161109', help='Start date of the plotting')
+@click.option('--end_date', default='20161123', help='End date of the plotting')
+@click.option('--title_addition', default='Frog 0.7', help='Additional Chart Title Text')
+@click.option('--indicators', default='RangeStat,Frog0.7',
+              help='Indicator separated with comma: RangeStat,Frog[multiplier],BB,RegLine')
+@click.option('--multiproc', help='For Pycharm debug only, no use')
+@click.option('--qt-support', help='For Pycharm debug only, no use')
+@click.option('--client', help='For Pycharm debug only, no use')
+@click.option('--file', help='For Pycharm debug only, no use')
+@click.option('--port', help='For Pycharm debug only, no use')
+def main(ticker, data_folder, trade_file, out_folder, subchart, start_date, end_date, title_addition, indicators,
+         multiproc, qt_support, client, file, port):
+    indicator_list = indicators.split(',')
+    graph_setup = GraphSetup(
+        start_date=start_date,
+        end_date=end_date,
+        ticker=ticker,
+        data_folder_root=data_folder,
+        trade_file=trade_file,
+        indicator_list=indicator_list
+    )
+    graph_setup.save_chart(output_folder=out_folder, title_addition=title_addition, subchart=subchart)
 
 if __name__ == '__main__':
-    one_minute_price_folder = r'.\sample_data\1minute\price'
-    one_minute_factor_folder = r'.\sample_data\1minute\factor'
-    daily_price_folder = r'.\sample_data\daily\price'
-    daily_factor_folder = r'.\sample_data\daily\factor'
-    trade_file = r'.\sample_data\AAPL_Trade.csv'
-    start_date = '20161109'
-    end_date = '20161123'
-    ticker = 'AAPL'
-
-    #################### comment this area out if you run sample data
-    #
-    one_minute_price_folder = r'C:\temp\1minute\price'
-    one_minute_factor_folder = r'C:\temp\1minute\factor'
-    daily_price_folder = r'C:\temp\daily\price'
-    daily_factor_folder = r'C:\temp\daily\factor'
-    trade_file = r'.\sample_data\AAPL_Trade.csv'
-    start_date = '20160109'
-    end_date = '20160123'
-    ticker = 'AAPL'
-
-
-    #style setup
-    graph_global_setup = {
-        'title': ticker + ' from  ' + start_date + ' to ' + end_date,
-        'yAxis': [{'title': 'Price'}]
-    }
-    ohlc_style = {'dataGrouping': {'enabled': False}}
-    area_range_style = {'fillOpacity ': 0.2}
-
-    target_price = one_minute_price_folder +  r'\{0}.csv'.format(ticker)
-    price_df = pd.read_csv(target_price, parse_dates=True, index_col=0)
-    price_df = price_df.loc[price_df.index >= pd.to_datetime(start_date)]
-    price_df = price_df.loc[price_df.index <= pd.to_datetime(end_date)]
-    original_df = price_df.copy()
-    price_df['DailyOpen'] = FactorBuilder.get_daily_open(original_df)
-    price_df['MA30'], price_df['BB30_1U'], price_df['BB30_1B'] = FactorBuilder.get_bollinger_band(original_df, 30, 1)
-    _, price_df['BB30_2U'], price_df['BB30_2B'] = FactorBuilder.get_bollinger_band(original_df, 30, 2)
-    _, price_df['BB30_3U'], price_df['BB30_3B'] = FactorBuilder.get_bollinger_band(original_df, 30, 3)
-    price_df['RangeStat'], price_df['HybridFrog'], price_df['FrogBox'] = FactorBuilder.get_frog_info(
-        original_df,
-        ticker,
-        hybrid_multiplier=0.7,
-        target_folder=daily_factor_folder
-    )
-    price_df['RangeStatUp'] = price_df['DailyOpen'] + price_df['RangeStat']
-    price_df['RangeStatDown'] = price_df['DailyOpen'] - price_df['RangeStat']
-    price_df['HybridFrogUp'] = price_df['DailyOpen'] + price_df['HybridFrog']
-    price_df['HybridFrogDown'] = price_df['DailyOpen'] - price_df['HybridFrog']
-    price_df['RegLine10'], price_df['RegLine30'],price_df['RegLine90'], price_df['RegLine270'] = FactorBuilder\
-        .get_regression_line_info(original_df, ticker, target_folder=one_minute_factor_folder)
-    price_df['LongPrice'], price_df['ShortPrice'] = FactorBuilder.get_trade_info(original_df, trade_file)
-
-    #define the series that you want here, the pandas data frame need to contain the headers
-    ohlc = GraphSeries(name='OHLC', headers=['DateTime', 'Open', 'High', 'Low', 'Close'], seriestype='ohlc', style_setup=ohlc_style)
-    ma30 = GraphSeries(name='MA30', headers=['DateTime', 'MA30'], seriestype='line')
-    daily_open = GraphSeries(name='DailyOpen', headers=['DateTime', 'DailyOpen'], seriestype='line')
-    bb_1_std = GraphSeries(name='BB1', headers=['DateTime', 'BB30_1U', 'BB30_1B'], seriestype='arearange', style_setup=area_range_style)
-    bb_2_std = GraphSeries(name='BB2', headers=['DateTime', 'BB30_2U', 'BB30_2B'], seriestype='arearange', style_setup=area_range_style)
-    bb_3_std = GraphSeries(name='BB3', headers=['DateTime', 'BB30_3U', 'BB30_3B'], seriestype='arearange', style_setup=area_range_style)
-    rs_up = GraphSeries(name='RangeStatUp', headers=['DateTime', 'DailyOpen', 'RangeStatUp'], seriestype='arearange', style_setup=area_range_style)
-    rs_down = GraphSeries(name='RangeStatDown', headers=['DateTime', 'DailyOpen', 'RangeStatDown'], seriestype='arearange', style_setup=area_range_style)
-    hf_up = GraphSeries(name='HybridBoxUp', headers=['DateTime', 'DailyOpen', 'HybridFrogUp'], seriestype='arearange', style_setup=area_range_style)
-    hf_down = GraphSeries(name='HybridBoxDown', headers=['DateTime', 'DailyOpen', 'HybridFrogDown'], seriestype='arearange', style_setup=area_range_style)
-    rl_10 = GraphSeries(name='RegLine10', headers=['DateTime', 'RegLine10'], seriestype='line')
-    rl_30 = GraphSeries(name='RegLine30', headers=['DateTime', 'RegLine30'], seriestype='line')
-    rl_90 = GraphSeries(name='RegLine90', headers=['DateTime', 'RegLine90'], seriestype='line')
-    rl_270 = GraphSeries(name='RegLine270', headers=['DateTime', 'RegLine270'], seriestype='line')
-    long_trade = GraphSeries(name='Long', headers=['DateTime', 'LongPrice'], seriestype='scatter')
-    short_trade = GraphSeries(name='Short', headers=['DateTime', 'ShortPrice'], seriestype='scatter')
-    graphSetUp = [
-        ohlc
-        ,ma30
-        ,daily_open
-        # ,bb_1_std
-        # ,bb_2_std
-        # ,bb_3_std
-        ,rs_up
-        ,rs_down
-        ,hf_up
-        ,hf_down
-        # ,rl_10
-        # ,rl_30
-        # ,rl_90
-        # ,rl_270
-        ,long_trade
-        ,short_trade
-    ]
-
-    graphSetUpJson = json.dumps([ob.__dict__ for ob in graphSetUp])
-    dataInJson = price_df.reset_index().to_json(orient='records')
-    globalSetUpJson = json.dumps(graph_global_setup)
-
-    with open('set_up.json', 'w') as f:
-        f.write(graphSetUpJson)
-
-    with open('data.json', 'w') as f:
-        f.write(dataInJson)
-
-    print(dataInJson)
-
-    template_folder = r'.\sschart'
-    template_name = r'Chart-template.html'
-	#change this to whatever folder that you want to store the result html
-    export_path = r'test123.html'
-
-    generator = GraphHtmlGenerator(template_folder=template_folder, template_name=template_name)
-    generator.generate_html_with_json(price_json_data=dataInJson, graph_setup_data=graphSetUpJson,graph_global_setup=globalSetUpJson, export_path=export_path)
-    print('Done!')
+    main()
