@@ -5,12 +5,16 @@
 		<title></title>
 		
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
+		<style>
+			.subChart{
+				height: 980px; min-width: 310px
+			}
+		</style>
 	    
     </head>
     <body>
 		
-<div id="container" style="height: 980px; min-width: 310px"></div>
+<div id="container" style=""></div>
 
 <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
 <script src="https://code.highcharts.com/stock/highstock.js"></script>
@@ -18,7 +22,7 @@
 <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
 <script src="https://rawgithub.com/RolandBanguiran/highcharts-scalable-yaxis/master/scalable-yaxis.js"></script>
 <!-- Grab the graphgenerator from github CDN, with a protocol relative URL; fall back to local if offline -->
-<script src="https://soysauceclub.github.io/SoySauceChart/sschart/graph-generator.js"></script>
+<!--<script src="https://soysauceclub.github.io/SoySauceChart/sschart/graph-generator.js"></script> -->
 <script>
 if (typeof GraphGenerator == 'undefined') {
     document.write('<script src="graph-generator.js">\x3C/script>');
@@ -28,43 +32,64 @@ if (typeof GraphGenerator == 'undefined') {
 <script>
 
 $(function () {
-	var data = {{PRICE_DATA}};
-	var graphSetup = {{GRAPH_SETUP_DATA}};
-	var globalGraphSetup = {{GRAPH_GLOBAL_SETUP}};
-    var graphSeries = [];
-
-	for(var i = 0; i < graphSetup.length; i++) {
-		var currentSeries = {type: graphSetup[i].seriestype, name: graphSetup[i].name, data: [], yAxis: graphSetup[i].yAxis};
-
-		currentSeries.zIndex = i;
-		//setup the series style
-		if(graphSetup[i].style_setup != null)
-		{
-			for(var propertyName in graphSetup[i].style_setup){
-				if (graphSetup[i].style_setup.hasOwnProperty(propertyName)) {
-					currentSeries[propertyName] = graphSetup[i].style_setup[propertyName];
-				}
-				
-			}
-		}
-
-		graphSeries.push(currentSeries);
-	}
-
+	var data = {{CHARTS}};
+	
 	for(var i = 0; i < data.length; i++)
 	{
-		for(var j = 0; j < graphSeries.length; j++)
-		{
-			var rowData = [];
-			for(var k = 0; k < graphSetup[j].headers.length; k++)
-			{
-				rowData.push(data[i][graphSetup[j].headers[k]]);
-			}
-			graphSeries[j].data.push(rowData);
-		}
+		var currentChartData = data[i];
+		generateCharts(i, currentChartData.seriesData, currentChartData.graphSetUp, currentChartData.globalSetUp)
 	}
 	
-	new GraphGenerator().GenerateGraph('#container', graphSeries, globalGraphSetup);
+	function generateCharts(chartIndex, dataOfGraph, setUpOfGraph, globalGraphSetup)
+	{
+		var subChartDivId = 'subChartDiv' + chartIndex.toString();
+        var subChartDiv = $('<div>', { id: subChartDivId, class: 'subChart' });
+		$('#container').append(subChartDiv); //append sub div for sub chart
+		var graphSeries = [];
+		ProcessSeries(setUpOfGraph, graphSeries);
+		ProcessData(dataOfGraph, setUpOfGraph, graphSeries);
+		
+		new GraphGenerator().GenerateGraph('#' + subChartDivId, globalGraphSetup.title, graphSeries, globalGraphSetup);
+	}
+	
+	function ProcessSeries(graphSetup, graphSeries){
+		for(var i = 0; i < graphSetup.length; i++) {
+			var currentSeries = {type: graphSetup[i].seriestype, name: graphSetup[i].name, data: [], yAxis: graphSetup[i].yAxis};
+
+			currentSeries.zIndex = i;
+			//setup the series style
+			if(graphSetup[i].style_setup != null)
+			{
+				for(var propertyName in graphSetup[i].style_setup){
+					if (graphSetup[i].style_setup.hasOwnProperty(propertyName)) {
+						currentSeries[propertyName] = graphSetup[i].style_setup[propertyName];
+					}
+					
+				}
+			}
+
+			graphSeries.push(currentSeries);
+		}
+	}
+
+	function ProcessData(graphData, graphSetup, graphSeries){
+		for(var i = 0; i < graphData.length; i++)
+		{
+			for(var j = 0; j < graphSeries.length; j++)
+			{
+				var rowData = [];
+				for(var k = 0; k < graphSetup[j].headers.length; k++)
+				{
+					rowData.push(graphData[i][graphSetup[j].headers[k]]);
+				}
+				graphSeries[j].data.push(rowData);
+			}
+		}
+	}
+
+	
+	
+	
 
 });
 

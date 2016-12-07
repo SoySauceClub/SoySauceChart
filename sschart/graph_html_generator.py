@@ -29,6 +29,14 @@ class GraphHtmlGenerator(object):
         result_html = template.render(PRICE_DATA=price_json_data, GRAPH_SETUP_DATA=graph_setup_data, GRAPH_GLOBAL_SETUP=graph_global_setup)
         GraphHtmlGenerator._save_html(export_path, result_html)
 
+    def generate_html_with_json(self, charts_json_data, export_path):
+        # Create the jinja2 environment.
+        # Notice the use of trim_blocks, which greatly helps control whitespace.
+        env = Environment(loader=FileSystemLoader(self.template_folder), trim_blocks=True)
+        template = env.get_template(self.template_name)
+        result_html = template.render(CHARTS=charts_json_data)
+        GraphHtmlGenerator._save_html(export_path, result_html)
+
     @staticmethod
     def _save_html(file_name, result_html):
         with open(file_name, "w") as text_file:

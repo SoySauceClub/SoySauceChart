@@ -1,6 +1,6 @@
 var GraphGenerator = (function () {
 	function GraphGenerator(){}
-    GraphGenerator.prototype.GenerateGraph = function(containerSelector, seriesData, graphSetUp) {
+    GraphGenerator.prototype.GenerateGraph = function(containerSelector, title, seriesData, graphSetUp) {
         $(containerSelector).highcharts('StockChart', {
 
             rangeSelector: {
@@ -8,7 +8,7 @@ var GraphGenerator = (function () {
             },
 
             title: {
-                text: graphSetUp.title
+                text: title
             },
 			legend: {
            		enabled: true,

@@ -6,6 +6,15 @@ from factor.factor_builder import FactorBuilder
 from sschart.graph_html_generator import GraphHtmlGenerator
 from sschart.chart_style import ChartStyle
 
+class SingleChart(object):
+    def __init__(self, data_json, graph_setup_json, global_setup_json):
+        self.data = data_json
+        self.graphSetUp = graph_setup_json
+        self.globalSetUp = global_setup_json
+
+    def to_json(self):
+        return '{' + 'seriesData:{0}, graphSetUp:{1}, globalSetUp: {2}'\
+            .format(self.data, self.graphSetUp, self.globalSetUp) + '}'
 
 class GraphSeries(object):
     def __init__(self, name, headers, seriestype, y_axis=0, style_setup=None):
@@ -32,16 +41,33 @@ class GraphSetup(object):
 
     def save_chart(self, output_folder, title_addition, subchart):
         if subchart:
+            multi_charts = []
             start_date = self.start_date
             while int(start_date) <= int(self.end_date):
                 end_date = GraphSetup._next_weekday(pd.to_datetime(start_date), 6).strftime('%Y%m%d')
                 price_df = self.price_df[(self.price_df.index >= pd.to_datetime(start_date))
                                          & (self.price_df.index <= pd.to_datetime(end_date))]
-                self._save(price_df, start_date, end_date, title_addition, output_folder)
+                single_chart_data = self._construct_single_chart(price_df, start_date, end_date, title_addition)
+                multi_charts.append(single_chart_data)
                 start_date = end_date
+            multi_charts_json = '[' + ','.join([x.to_json() for x in multi_charts]) + ']'
+            self._save(multi_charts_json, self.start_date, self.end_date, output_folder)
 
         else:
-            self._save(self.price_df,self.start_date, self.end_date, title_addition, output_folder)
+            single_chart_data = self._construct_single_chart(self.price_df, self.start_date, self.end_date, title_addition)
+            charts = '[' + single_chart_data.to_json() + ']'
+            self._save(charts, self.start_date, self.end_date, output_folder)
+
+    def _construct_single_chart(self, price_df, start_date, end_date, title_addition):
+        graph_global_setup = {
+                'title': self.ticker + ' ' + title_addition + ' from  ' + start_date + ' to ' + end_date,
+                'yAxis': [{'title': 'Price'}]
+            }
+        graph_set_up_json = json.dumps([ob.__dict__ for ob in self.graphics])
+        data_in_json = price_df.reset_index().to_json(orient='records')
+        global_set_up_json = json.dumps(graph_global_setup)
+        single_chart_data = SingleChart(data_in_json, graph_set_up_json, global_set_up_json)
+        return single_chart_data
 
     def _save(self, price_df, start_date, end_date, title_addition, output_folder):
         template_folder = r'.\sschart'
@@ -57,6 +83,14 @@ class GraphSetup(object):
         generator = GraphHtmlGenerator(template_folder=template_folder, template_name=template_name)
         generator.generate_html_with_json(price_json_data=data_in_json, graph_setup_data=graph_set_up_json,
                                           graph_global_setup=global_set_up_json, export_path=export_path)
+
+    def _save(self, multiple_charts, start_date, end_date, output_folder):
+        template_folder = r'.\sschart'
+        template_name = r'Chart-template.html'
+        data = multiple_charts
+        export_path = os.path.join(output_folder, '{0}_{1}_{2}.html'.format(self.ticker, start_date, end_date))
+        generator = GraphHtmlGenerator(template_folder=template_folder, template_name=template_name)
+        generator.generate_html_with_json(charts_json_data=data, export_path=export_path)
 
     def _get_frog_multiplier(self, indicator_list):
         frog_multiplier = 0
