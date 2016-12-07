@@ -17,6 +17,13 @@
 <script src="https://code.highcharts.com/stock/highcharts-more.js"></script>
 <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
 <script src="https://rawgithub.com/RolandBanguiran/highcharts-scalable-yaxis/master/scalable-yaxis.js"></script>
+<!-- Grab the graphgenerator from github CDN, with a protocol relative URL; fall back to local if offline -->
+<script src="https://soysauceclub.github.io/SoySauceChart/sschart/graph-generator.js"></script>
+<script>
+if (typeof GraphGenerator == 'undefined') {
+    document.write('<script src="graph-generator.js">\x3C/script>');
+}
+</script>
 
 <script>
 
@@ -56,55 +63,8 @@ $(function () {
 			graphSeries[j].data.push(rowData);
 		}
 	}
-        // create the chart
-        $('#container').highcharts('StockChart', {
-
-            rangeSelector: {
-                enabled: true
-            },
-
-            title: {
-                text: globalGraphSetup.title
-            },
-			legend: {
-           		enabled: true,
-           		layout: 'horizontal',
-           		maxHeight: 100,
-          	},
-            yAxis: [{
-                labels: {
-                    align: 'right',
-                    x: -3
-                },
-                title: {
-                    text: globalGraphSetup.yAxis[0].title
-                },
-                scrollbar: {
-                    enabled: true
-                },
-                lineWidth: 2,
-                tickInterval: 0.02,
-				scalable: true
-            }],
-			tooltip: {
-				valueDecimals: 2,
-				enabled: true,
-				followTouchMove: false,
-				positioner: function () {
-                    return { x: 0, y: 0 };
-                }
-            },
-            series: graphSeries
-        });
-
-    
 	
-    
-	
-	
-	
-
-	
+	new GraphGenerator().GenerateGraph('#container', graphSeries, globalGraphSetup);
 
 });
 
