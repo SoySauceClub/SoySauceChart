@@ -26,7 +26,7 @@ class GraphSeries(object):
 
 
 class GraphSetup(object):
-    def __init__(self, start_date, end_date, ticker, data_folder_root, trade_file, indicator_list):
+    def __init__(self, start_date, end_date, ticker, data_folder_root, trade_file, indicator_list, list_all):
         self.start_date = start_date
         self.end_date = end_date
         self.ticker = ticker
@@ -39,24 +39,45 @@ class GraphSetup(object):
         self.graphics = self._setup_graphics(indicator_list)
         self.price_df = self._build_chart_data()
 
+        #added by Liang Guo
+        self.list_all = list_all
+        self.price_dfs = []
+        self.tickers = []
+        if list_all:
+            self.tickers = map(lambda file_name: file_name.split('.')[0], os.listdir(self.one_minute_price_folder))
+            self.price_dfs = map(self._build_chart_data, self.tickers)
+
     def save_chart(self, output_folder, title_addition, subchart):
-        if subchart:
-            multi_charts = []
+        if subchart or self.list_all:
+            if self.list_all:
+                multi_charts_json = self.build_multi_charts_json(title_addition, self.price_dfs)
+            else:
+                multi_charts_json = self.build_multi_charts_json(title_addition)
+            self._save(multi_charts_json, self.start_date, self.end_date, output_folder)
+        else:
+            charts = self.build_charts(title_addition)
+            self._save(charts, self.start_date, self.end_date, output_folder)
+
+    def build_multi_charts_json(self, title_addition, price_dfs=None):
+        multi_charts = []
+        price_dfs = [self.price_df] if price_dfs is None else self.price_dfs
+        for index, price_df in enumerate(price_dfs):
             start_date = self.start_date
+            self.ticker = self.tickers[index]
             while int(start_date) <= int(self.end_date):
                 end_date = GraphSetup._next_weekday(pd.to_datetime(start_date), 6).strftime('%Y%m%d')
-                price_df = self.price_df[(self.price_df.index >= pd.to_datetime(start_date))
-                                         & (self.price_df.index <= pd.to_datetime(end_date))]
-                single_chart_data = self._construct_single_chart(price_df, start_date, end_date, title_addition)
+                current_price_df = price_df[(price_df.index >= pd.to_datetime(start_date))
+                                         & (price_df.index <= pd.to_datetime(end_date))]
+                single_chart_data = self._construct_single_chart(current_price_df, start_date, end_date, title_addition)
                 multi_charts.append(single_chart_data)
                 start_date = end_date
-            multi_charts_json = '[' + ','.join([x.to_json() for x in multi_charts]) + ']'
-            self._save(multi_charts_json, self.start_date, self.end_date, output_folder)
+        multi_charts_json = '[' + ','.join([x.to_json() for x in multi_charts]) + ']'
+        return multi_charts_json
 
-        else:
-            single_chart_data = self._construct_single_chart(self.price_df, self.start_date, self.end_date, title_addition)
-            charts = '[' + single_chart_data.to_json() + ']'
-            self._save(charts, self.start_date, self.end_date, output_folder)
+    def build_charts(self, title_addition):
+        single_chart_data = self._construct_single_chart(self.price_df, self.start_date, self.end_date, title_addition)
+        charts = '[' + single_chart_data.to_json() + ']'
+        return charts
 
     def _construct_single_chart(self, price_df, start_date, end_date, title_addition):
         graph_global_setup = {
@@ -88,7 +109,8 @@ class GraphSetup(object):
         template_folder = r'.\sschart'
         template_name = r'Chart-template.html'
         data = multiple_charts
-        export_path = os.path.join(output_folder, '{0}_{1}_{2}.html'.format(self.ticker, start_date, end_date))
+        title = 'all' if self.list_all else self.ticker
+        export_path = os.path.join(output_folder, '{0}_{1}_{2}.html'.format(title, start_date, end_date))
         generator = GraphHtmlGenerator(template_folder=template_folder, template_name=template_name)
         generator.generate_html_with_json(charts_json_data=data, export_path=export_path)
 
@@ -146,8 +168,10 @@ class GraphSetup(object):
 
         return graph_setup
 
-    def _build_chart_data(self):
-        target_price_path = os.path.join(self.one_minute_price_folder, self.ticker + '.csv')
+    def _build_chart_data(self, ticker=None):
+        if ticker is None:
+            ticker = self.ticker
+        target_price_path = os.path.join(self.one_minute_price_folder, ticker + '.csv')
         price_df = pd.read_csv(target_price_path, parse_dates=True, index_col=0)
         price_df = price_df.loc[price_df.index >= pd.to_datetime(self.start_date)]
         price_df = price_df.loc[price_df.index <= pd.to_datetime(self.end_date)]
@@ -159,7 +183,7 @@ class GraphSetup(object):
         _, price_df['BB30_3U'], price_df['BB30_3B'] = FactorBuilder.get_bollinger_band(original_df, 30, 3)
         price_df['RangeStat'], price_df['HybridFrog'], price_df['FrogBox'] = FactorBuilder.get_frog_info(
             original_df,
-            self.ticker,
+            ticker,
             hybrid_multiplier=self.frog_multiplier,
             target_folder=self.daily_factor_folder
         )
@@ -168,7 +192,7 @@ class GraphSetup(object):
         price_df['HybridFrogUp'] = price_df['DailyOpen'] + price_df['HybridFrog']
         price_df['HybridFrogDown'] = price_df['DailyOpen'] - price_df['HybridFrog']
         price_df['RegLine10'], price_df['RegLine30'], price_df['RegLine90'], price_df['RegLine270'] = FactorBuilder \
-            .get_regression_line_info(original_df, self.ticker, target_folder=self.one_minute_factor_folder)
+            .get_regression_line_info(original_df, ticker, target_folder=self.one_minute_factor_folder)
 
         if self.trade_file is not None:
             price_df['LongPrice'], price_df['ShortPrice'] = FactorBuilder.get_trade_info(original_df, self.trade_file)
