@@ -37,7 +37,7 @@ class FactorBuilder(object):
         fdf['Date'] = fdf.index.date
         df['DateTime'] = df.index
         temp_df = pd.merge(df, fdf[['Date', 'AvgRange', 'FrogBox']], how='left', on='Date').set_index(keys='DateTime')
-        temp_df.loc[temp_df.index.time > datetime.time(10,0), ['AvgRange', 'FrogBox']] = None
+        temp_df.loc[temp_df.index.time > datetime.time(10, 0), ['AvgRange', 'FrogBox']] = None
         temp_df['RangeStat'] = temp_df['AvgRange'] + temp_df['FrogBox']
         temp_df['HybridFrog'] = temp_df['FrogBox'] * hybrid_multiplier
         return temp_df['RangeStat'], temp_df['HybridFrog'], temp_df['FrogBox']
