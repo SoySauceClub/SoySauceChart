@@ -227,6 +227,7 @@ class GraphSetup(object):
             target_folder=self.one_minute_factor_folder
         )
 
+        # TODO: refactor this so that it could find trade files by ticker
         if self.trade_file is not None:
             price_df['LongPrice'], price_df['ShortPrice'] = FactorBuilder.get_trade_info(original_df, self.trade_file)
 
