@@ -27,14 +27,17 @@ class FactorBuilder(object):
     @staticmethod
     def get_frog_info(df, ticker, hybrid_multiplier=0.7, target_folder=r'C:\temp\daily\factor'):
         file_path = os.path.join(target_folder, ticker + '.csv')
-        fdf = pd.read_csv(file_path, parse_dates=True, index_col=0)
+        try:
+            fdf = pd.read_csv(file_path, parse_dates=True, index_col=0)
+        except IOError:
+            return None, None, None
         dates_df = df.groupby(df.index.map(lambda x: x.date)).count()
         fdf = fdf[fdf.index.isin(dates_df.index)]
         df['Date'] = df.index.date
         fdf['Date'] = fdf.index.date
         df['DateTime'] = df.index
         temp_df = pd.merge(df, fdf[['Date', 'AvgRange', 'FrogBox']], how='left', on='Date').set_index(keys='DateTime')
-        temp_df.loc[temp_df.index.time > datetime.time(10,0), ['AvgRange', 'FrogBox']] = None
+        temp_df.loc[temp_df.index.time > datetime.time(10, 0), ['AvgRange', 'FrogBox']] = None
         temp_df['RangeStat'] = temp_df['AvgRange'] + temp_df['FrogBox']
         temp_df['HybridFrog'] = temp_df['FrogBox'] * hybrid_multiplier
         return temp_df['RangeStat'], temp_df['HybridFrog'], temp_df['FrogBox']
@@ -42,7 +45,10 @@ class FactorBuilder(object):
     @staticmethod
     def get_regression_line_info(df, ticker, target_folder=r'C:\temp\1minute\factor'):
         file_path = os.path.join(target_folder, ticker + '.csv')
-        fdf = pd.read_csv(file_path, parse_dates=True, index_col=0)
+        try:
+            fdf = pd.read_csv(file_path, parse_dates=True, index_col=0)
+        except IOError:
+            return None, None, None, None
         sliced_fdf = fdf[fdf.index.isin(df.index)]
         return sliced_fdf['RegLine10'], sliced_fdf['RegLine30'], sliced_fdf['RegLine90'], sliced_fdf['RegLine270']
 
