@@ -12,17 +12,17 @@ from sschart.chart_style import ChartStyle
 @click.option('--subchart/--non-subchart', default=True, help='Enable weekly range plot if needed')
 @click.option('--start_date', default='20161110', help='Start date of the plotting')
 @click.option('--end_date', default='20161110', help='End date of the plotting')
-@click.option('--title_addition', default='Frog 0.7', help='Additional Chart Title Text')
+@click.option('--title_addition', default='', help='Additional Chart Title Text')
 @click.option('--indicators', default='RangeStat,Frog0.7',
               help='Indicator separated with comma: RangeStat,Frog[multiplier],BB,RegLine')
-@click.option('--list-all', default=True, help='Display all tickers in data folder')
+@click.option('--list-daily/--list-ticker', default=True, help='Display all tickers in data folder')
 @click.option('--multiproc', help='For Pycharm debug only, no use')
 @click.option('--qt-support', help='For Pycharm debug only, no use')
 @click.option('--client', help='For Pycharm debug only, no use')
 @click.option('--file', help='For Pycharm debug only, no use')
 @click.option('--port', help='For Pycharm debug only, no use')
 def main(ticker, data_folder, trade_file, out_folder, subchart, start_date, end_date, title_addition, indicators,
-         list_all, multiproc, qt_support, client, file, port):
+         list_daily, multiproc, qt_support, client, file, port):
     indicator_list = indicators.split(',')
     graph_setup = GraphSetup(
         start_date=start_date,
@@ -31,7 +31,7 @@ def main(ticker, data_folder, trade_file, out_folder, subchart, start_date, end_
         data_folder_root=data_folder,
         trade_file=trade_file,
         indicator_list=indicator_list,
-        list_all=list_all
+        list_daily=list_daily
     )
     graph_setup.save_chart(output_folder=out_folder, title_addition=title_addition, subchart=subchart)
 

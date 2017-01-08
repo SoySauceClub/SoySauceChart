@@ -28,7 +28,7 @@ class GraphSeries(object):
 
 
 class GraphSetup(object):
-    def __init__(self, start_date, end_date, ticker, data_folder_root, trade_file, indicator_list, list_all):
+    def __init__(self, start_date, end_date, ticker, data_folder_root, trade_file, indicator_list, list_daily):
         self.start_date = start_date
         self.end_date = end_date
         self.one_minute_price_folder = os.path.join(data_folder_root, '1minute', 'price')
@@ -39,14 +39,14 @@ class GraphSetup(object):
         self.frog_multiplier = GraphSetup._get_frog_multiplier(indicator_list)
         self.graphics = self._setup_graphics(indicator_list)
 
-        self.list_all = list_all
+        self.list_daily = list_daily
         self.trade_file_folder = os.path.join(data_folder_root, 'trade')
-        if self.list_all is not None:
+        if self.list_daily:
             self.tickers = map(lambda file_name: file_name.split('.')[0], os.listdir(self.one_minute_price_folder))
             self.price_dfs = map(self._build_chart_data, self.tickers)
         else:
             self.tickers = [ticker]
-            self.price_dfs = [self._build_chart_data(ticker, start_date, end_date)]
+            self.price_dfs = [self._build_chart_data(ticker)]
 
     def save_chart(self, output_folder, title_addition, subchart):
         multi_charts_json = self.build_multi_charts_json(title_addition, self.price_dfs, subchart)
@@ -106,7 +106,7 @@ class GraphSetup(object):
         template_folder = r'.\sschart'
         template_name = r'Chart-template.html'
         data = multiple_charts
-        title = 'all' if self.list_all else self.tickers[0]
+        title = 'all' if self.list_daily else self.tickers[0]
         export_path = os.path.join(output_folder, '{0}_{1}_{2}.html'.format(title, start_date, end_date))
         generator = GraphHtmlGenerator(template_folder=template_folder, template_name=template_name)
         generator.generate_html_with_json(charts_json_data=data, export_path=export_path)
@@ -118,22 +118,27 @@ class GraphSetup(object):
                            style_setup=ChartStyle.OHLC_STYLE)
         ma30 = GraphSeries(name='MA30',
                            headers=['DateTime', 'MA30'],
-                           seriestype='line')
+                           seriestype='line',
+                           style_setup=ChartStyle.MA30_STYLE)
         daily_open = GraphSeries(name='DailyOpen',
                                  headers=['DateTime', 'DailyOpen'],
                                  seriestype='line')
         bb_1_std = GraphSeries(name='BB1',
                                headers=['DateTime', 'BB30_1U', 'BB30_1B'],
                                seriestype='arearange',
-                               style_setup=ChartStyle.AREA_STYLE)
+                               style_setup=ChartStyle.BB_1U_STYLE)
         bb_2_std = GraphSeries(name='BB2',
                                headers=['DateTime', 'BB30_2U', 'BB30_2B'],
                                seriestype='arearange',
-                               style_setup=ChartStyle.AREA_STYLE)
+                               style_setup=ChartStyle.BB_2U_STYLE)
         bb_3_std = GraphSeries(name='BB3',
                                headers=['DateTime', 'BB30_3U', 'BB30_3B'],
                                seriestype='arearange',
-                               style_setup=ChartStyle.AREA_STYLE)
+                               style_setup=ChartStyle.BB_3U_STYLE)
+        dragon = GraphSeries(name='Dragon',
+                             headers=['DateTime', 'BB10_.5U', 'BB10_.5B'],
+                             seriestype='arearange',
+                             style_setup=ChartStyle.DRAGON_STYLE)
         rs_up = GraphSeries(name='RangeStatUp',
                             headers=['DateTime', 'DailyOpen', 'RangeStatUp'],
                             seriestype='arearange',
@@ -152,16 +157,20 @@ class GraphSetup(object):
                               style_setup=ChartStyle.FROG_AREA_STYLE)
         rl_10 = GraphSeries(name='RegLine10',
                             headers=['DateTime', 'RegLine10'],
-                            seriestype='line')
+                            seriestype='line',
+                            style_setup=ChartStyle.R10_STYLE)
         rl_30 = GraphSeries(name='RegLine30',
                             headers=['DateTime', 'RegLine30'],
-                            seriestype='line')
+                            seriestype='line',
+                            style_setup=ChartStyle.R30_STYLE)
         rl_90 = GraphSeries(name='RegLine90',
                             headers=['DateTime', 'RegLine90'],
-                            seriestype='line')
+                            seriestype='line',
+                            style_setup=ChartStyle.R90_STYLE)
         rl_270 = GraphSeries(name='RegLine270',
                              headers=['DateTime', 'RegLine270'],
-                             seriestype='line')
+                             seriestype='line',
+                             style_setup=ChartStyle.R270_STYLE)
         long_trade = GraphSeries(name='Long',
                                  headers=['DateTime', 'LongPrice'],
                                  seriestype='scatter')
@@ -178,7 +187,7 @@ class GraphSetup(object):
             graph_setup.extend([hf_up, hf_down])
 
         if 'BB' in indicator_list:
-            graph_setup.extend([ma30, bb_1_std, bb_2_std, bb_3_std])
+            graph_setup.extend([ma30, bb_1_std, bb_2_std, bb_3_std, dragon])
 
         if 'RegLine' in indicator_list:
             graph_setup.extend([rl_10, rl_30, rl_90, rl_270])
@@ -191,25 +200,32 @@ class GraphSetup(object):
     def _build_chart_data(self, ticker):
         target_price_path = os.path.join(self.one_minute_price_folder, ticker + '.csv')
         price_df = pd.read_csv(target_price_path, parse_dates=True, index_col=0)
-        price_df = price_df.loc[price_df.index >= pd.to_datetime(self.start_date)]
-        price_df = price_df.loc[price_df.index <= pd.to_datetime(self.end_date) + datetime.timedelta(days=1)]
-        original_df = price_df.copy()
-        price_df['DailyOpen'] = FactorBuilder.get_daily_open(original_df)
+        # calculate entire time series so that it doesnt have the gap.
         price_df['MA30'], price_df['BB30_1U'], price_df['BB30_1B'] = FactorBuilder.get_bollinger_band(
-            original_df,
+            price_df,
             30,
             1
         )
         _, price_df['BB30_2U'], price_df['BB30_2B'] = FactorBuilder.get_bollinger_band(
-            original_df,
+            price_df,
             30,
             2
         )
         _, price_df['BB30_3U'], price_df['BB30_3B'] = FactorBuilder.get_bollinger_band(
-            original_df,
+            price_df,
             30,
             3
         )
+        _, price_df['BB10_.5U'], price_df['BB10_.5B'] = FactorBuilder.get_bollinger_band(
+            price_df,
+            10,
+            .5
+        )
+        price_df = price_df.loc[price_df.index >= pd.to_datetime(self.start_date)]
+        price_df = price_df.loc[price_df.index <= pd.to_datetime(self.end_date) + datetime.timedelta(days=1)]
+        original_df = price_df.copy()
+        price_df['DailyOpen'] = FactorBuilder.get_daily_open(original_df)
+
         price_df['RangeStat'], price_df['HybridFrog'], price_df['FrogBox'] = FactorBuilder.get_frog_info(
             original_df,
             ticker,
