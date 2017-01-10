@@ -49,7 +49,7 @@ $(function () {
 		ProcessSeries(setUpOfGraph, graphSeries);
 		ProcessData(dataOfGraph, setUpOfGraph, graphSeries);
 		
-		new GraphGenerator().GenerateGraph('#' + subChartDivId, globalGraphSetup.title, graphSeries, globalGraphSetup);
+		new GraphGenerator().GenerateGraph('#' + subChartDivId, globalGraphSetup.title, graphSeries, globalGraphSetup, 20);
 	}
 	
 	function ProcessSeries(graphSetup, graphSeries){
