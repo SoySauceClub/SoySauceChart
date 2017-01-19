@@ -1,8 +1,11 @@
 import click
+from datetime import datetime
 from sschart.graph_series import GraphSeries, GraphSetup
 from sschart.graph_html_generator import GraphHtmlGenerator
 from sschart.chart_style import ChartStyle
 
+today = datetime.now().today()
+today_str = today.strftime('%Y%m%d')
 
 @click.command()
 @click.option('--ticker', default='AAPL', help='Ticker Symbol')
@@ -10,8 +13,8 @@ from sschart.chart_style import ChartStyle
 @click.option('--trade_file', default=None, help='The trade file that shows the actual trades')
 @click.option('--out_folder', default=r'.', help='The folder that contains the output')
 @click.option('--subchart/--non-subchart', default=True, help='Enable weekly range plot if needed')
-@click.option('--start_date', default='20161110', help='Start date of the plotting')
-@click.option('--end_date', default='20161110', help='End date of the plotting')
+@click.option('--start_date', default=today_str, help='Start date of the plotting')
+@click.option('--end_date', default=today_str, help='End date of the plotting')
 @click.option('--title_addition', default='', help='Additional Chart Title Text')
 @click.option('--indicators', default='RangeStat,Frog0.7',
               help='Indicator separated with comma: RangeStat,Frog[multiplier],BB,RegLine')
