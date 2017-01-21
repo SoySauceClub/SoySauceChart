@@ -19,13 +19,14 @@ today_str = today.strftime('%Y%m%d')
 @click.option('--indicators', default='RangeStat,Frog0.7',
               help='Indicator separated with comma: RangeStat,Frog[multiplier],BB,RegLine')
 @click.option('--list-daily/--list-ticker', default=True, help='Display all tickers in data folder')
+@click.option('--template_name', default=r'Chart-template.html', help='Specify the template name')
 @click.option('--multiproc', help='For Pycharm debug only, no use')
 @click.option('--qt-support', help='For Pycharm debug only, no use')
 @click.option('--client', help='For Pycharm debug only, no use')
 @click.option('--file', help='For Pycharm debug only, no use')
 @click.option('--port', help='For Pycharm debug only, no use')
 def main(ticker, data_folder, trade_file, out_folder, subchart, start_date, end_date, title_addition, indicators,
-         list_daily, multiproc, qt_support, client, file, port):
+         list_daily, template_name, multiproc, qt_support, client, file, port):
     indicator_list = indicators.split(',')
     graph_setup = GraphSetup(
         start_date=start_date,
@@ -34,7 +35,8 @@ def main(ticker, data_folder, trade_file, out_folder, subchart, start_date, end_
         data_folder_root=data_folder,
         trade_file=trade_file,
         indicator_list=indicator_list,
-        list_daily=list_daily
+        list_daily=list_daily,
+        template_name=template_name
     )
     graph_setup.save_chart(output_folder=out_folder, title_addition=title_addition, subchart=subchart)
 

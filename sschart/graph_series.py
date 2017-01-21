@@ -28,7 +28,8 @@ class GraphSeries(object):
 
 
 class GraphSetup(object):
-    def __init__(self, start_date, end_date, ticker, data_folder_root, trade_file, indicator_list, list_daily):
+    def __init__(self, start_date, end_date, ticker, data_folder_root, trade_file, indicator_list, list_daily,
+                 template_name):
         self.start_date = start_date
         self.end_date = end_date
         self.one_minute_price_folder = os.path.join(data_folder_root, '1minute', 'price')
@@ -47,6 +48,7 @@ class GraphSetup(object):
         else:
             self.tickers = [ticker]
             self.price_dfs = [self._build_chart_data(ticker)]
+        self.template_name = template_name
 
     def save_chart(self, output_folder, title_addition, subchart):
         multi_charts_json = self.build_multi_charts_json(title_addition, self.price_dfs, subchart)
@@ -104,7 +106,7 @@ class GraphSetup(object):
 
     def _save(self, multiple_charts, start_date, end_date, output_folder):
         template_folder = r'.\sschart'
-        template_name = r'Chart-template.html'
+        template_name = self.template_name
         data = multiple_charts
         title = 'all' if self.list_daily else self.tickers[0]
         export_path = os.path.join(output_folder, '{0}_{1}_{2}.html'.format(title, start_date, end_date))
@@ -226,6 +228,7 @@ class GraphSetup(object):
         original_df = price_df.copy()
         price_df['DailyOpen'] = FactorBuilder.get_daily_open(original_df)
 
+        print(ticker)
         price_df['RangeStat'], price_df['HybridFrog'], price_df['FrogBox'] = FactorBuilder.get_frog_info(
             original_df,
             ticker,
