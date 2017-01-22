@@ -29,7 +29,7 @@ class GraphSeries(object):
 
 class GraphSetup(object):
     def __init__(self, start_date, end_date, ticker, data_folder_root, trade_file, indicator_list, list_daily,
-                 template_name):
+                 template_name, universe=None):
         self.start_date = start_date
         self.end_date = end_date
         self.one_minute_price_folder = os.path.join(data_folder_root, '1minute', 'price')
@@ -42,8 +42,11 @@ class GraphSetup(object):
 
         self.list_daily = list_daily
         self.trade_file_folder = os.path.join(data_folder_root, 'trade')
-        if self.list_daily:
+        if self.list_daily and universe is None:
             self.tickers = map(lambda file_name: file_name.split('.')[0], os.listdir(self.one_minute_price_folder))
+            self.price_dfs = map(self._build_chart_data, self.tickers)
+        elif self.list_daily and universe is not None:
+            self.tickers = GraphSetup.get_instruments_from_file(universe)
             self.price_dfs = map(self._build_chart_data, self.tickers)
         else:
             self.tickers = [ticker]
@@ -251,6 +254,17 @@ class GraphSetup(object):
             price_df['LongPrice'], price_df['ShortPrice'] = FactorBuilder.get_trade_info(original_df, self.trade_file)
 
         return price_df
+
+    @staticmethod
+    def get_instruments_from_file(filename):
+        """Load index from txt file"""
+        instruments = []
+        with open(filename, 'r') as f:
+            for instrument in f:
+                instruments.append(instrument.rstrip())
+        if len(instruments) > 0:
+            instruments = instruments[1:]
+        return instruments
 
     @staticmethod
     def _next_weekday(d, weekday):
