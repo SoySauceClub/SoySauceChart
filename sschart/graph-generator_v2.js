@@ -95,7 +95,8 @@ var GraphGenerator = (function () {
                 },
                 lineWidth: 2,
                 tickInterval: 0.02,
-				scalable: true
+				scalable: true,
+				opposite:false
             }],
 			tooltip: {
 				valueDecimals: 2,
