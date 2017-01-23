@@ -58,7 +58,7 @@ var GraphGenerator = (function () {
 
 	}
 	
-    GraphGenerator.prototype.GenerateGraph = function(containerSelector, title, seriesData, graphSetUp, numerOfPointToShow = 10) {
+    GraphGenerator.prototype.GenerateGraph = function(containerSelector, title, seriesData, graphSetUp, numerOfPointToShow = 45) {
 		
         $(containerSelector).highcharts('StockChart', {
 			chart: {
@@ -96,7 +96,7 @@ var GraphGenerator = (function () {
                 lineWidth: 2,
                 tickInterval: 0.02,
 				scalable: true,
-				opposite:false
+				offset: 50
             }],
 			tooltip: {
 				valueDecimals: 2,

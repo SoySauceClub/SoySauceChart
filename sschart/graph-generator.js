@@ -28,7 +28,8 @@ var GraphGenerator = (function () {
                 },
                 lineWidth: 2,
                 tickInterval: 0.02,
-				scalable: true
+				scalable: true,
+				offset: 50
             }],
 			tooltip: {
 				valueDecimals: 2,
