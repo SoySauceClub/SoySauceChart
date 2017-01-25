@@ -1,0 +1,1 @@
+python runner.py --data_folder c:\temp --list-ticker --indicators BB,RegLine --debug  --universe_path c:\temp\ETF.csv --template_name Chart-template_v2.html --out_folder c:\temp\chart_result
