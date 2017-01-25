@@ -58,7 +58,7 @@ var GraphGenerator = (function () {
 
 	}
 	
-    GraphGenerator.prototype.GenerateGraph = function(containerSelector, title, seriesData, graphSetUp, numerOfPointToShow = 45) {
+    GraphGenerator.prototype.GenerateGraph = function(containerSelector, title, seriesData, graphSetUp, numerOfPointToShow = 100) {
 		
         $(containerSelector).highcharts('StockChart', {
 			chart: {
