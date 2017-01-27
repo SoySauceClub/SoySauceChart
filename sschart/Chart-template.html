@@ -21,8 +21,10 @@
 <script src="https://code.highcharts.com/stock/highcharts-more.js"></script>
 <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
 <script src="https://rawgithub.com/RolandBanguiran/highcharts-scalable-yaxis/master/scalable-yaxis.js"></script>
+<script src="https://rawgithub.com/eligrey/FileSaver.js/master/FileSaver.min.js"></script>
 <!-- Grab the graphgenerator from github CDN, with a protocol relative URL; fall back to local if offline -->
-<script src="https://soysauceclub.github.io/SoySauceChart/sschart/graph-generator.js"></script>
+<!--<script src="https://soysauceclub.github.io/SoySauceChart/sschart/graph-generator.js"></script>-->
+<script src="sschart/graph-generator.js"></script>
 <script>
 if (typeof GraphGenerator == 'undefined') {
     document.write('<script src="graph-generator.js">\x3C/script>');
@@ -33,6 +35,7 @@ if (typeof GraphGenerator == 'undefined') {
 
 $(function () {
 	var data = {{CHARTS}};
+	var tradesData = {}
 	
 	for(var i = 0; i < data.length; i++)
 	{
@@ -44,19 +47,25 @@ $(function () {
 	{
 		var subChartDivId = 'subChartDiv' + chartIndex.toString();
         var subChartDiv = $('<div>', { id: subChartDivId, class: 'subChart' });
+		var exportBtn = $('<a>', {href: '#', text: 'Export trade data', click: function() { get_data(globalGraphSetup.title); }});
+		$('#container').append(exportBtn);
 		$('#container').append(subChartDiv); //append sub div for sub chart
+
 		var graphSeries = [];
 		ProcessSeries(setUpOfGraph, graphSeries);
 		ProcessData(dataOfGraph, setUpOfGraph, graphSeries);
-		
-		new GraphGenerator().GenerateGraph('#' + subChartDivId, globalGraphSetup.title, graphSeries, globalGraphSetup);
+
+		var tradeData = []
+		tradesData[globalGraphSetup.title] = tradeData;
+		new GraphGenerator().GenerateGraph('#' + subChartDivId, globalGraphSetup.title, graphSeries, globalGraphSetup, tradeData);
+
 	}
 	
 	function ProcessSeries(graphSetup, graphSeries){
 		for(var i = 0; i < graphSetup.length; i++) {
 			var currentSeries = {type: graphSetup[i].seriestype, name: graphSetup[i].name, data: [], yAxis: graphSetup[i].yAxis};
 
-			currentSeries.zIndex = i;
+			currentSeries.zIndex = graphSetup.length - i;
 			//setup the series style
 			if(graphSetup[i].style_setup != null)
 			{
@@ -87,7 +96,11 @@ $(function () {
 		}
 	}
 
-	
+	function get_data(title) {
+		var data_string = JSON.stringify(tradesData[title]);
+		var blob = new Blob([data_string], {type: "text/plain;charset=utf-8"});
+		saveAs(blob, title + '.json');
+	}
 	
 	
 
