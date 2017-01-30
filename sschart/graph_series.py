@@ -108,7 +108,7 @@ class GraphSetup(object):
         return single_chart_data
 
     def _save(self, multiple_charts, start_date, end_date, output_folder):
-        template_folder = r'.\sschart'
+        template_folder = r'./sschart'
         template_name = self.template_name
         data = multiple_charts
         title = 'all' if self.list_daily else self.tickers[0]
