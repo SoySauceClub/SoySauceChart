@@ -58,8 +58,58 @@ var GraphGenerator = (function () {
 
 	}
 	
+<<<<<<< HEAD
+<<<<<<< HEAD
     GraphGenerator.prototype.GenerateGraph = function(containerSelector, title, seriesData, graphSetUp, numerOfPointToShow = 100) {
 		
+=======
+=======
+>>>>>>> 2722c45cb35d410e37d4f8f3d3a780cea6890f36
+    GraphGenerator.prototype.GenerateGraph = function(containerSelector, title, seriesData, graphSetUp, numerOfPointToShow = 45, tradeData) {
+		for (var i = 0; i < seriesData.length; i++) {
+            if (seriesData[i].type == 'ohlc') {
+                seriesData[i].events = {
+                    click : function(event) {
+                        point = event.point;
+                        if (tradeData[point.x] == undefined) {
+                            tradeData[point.x] = {
+                                time: point.x,
+                                high: point.high,
+                                low: point.low,
+                                price: point.high,
+                                type: 'long'
+                            };
+                            this.chart.xAxis[0].addPlotLine({
+                                id: '' + point.x,
+                                color: 'red',
+                                dashStyle: 'solid',
+                                width: 3,
+                                value: point.x
+                            });
+                        } else if (tradeData[point.x].type == 'long') {
+                            tradeData[point.x].type = 'short';
+                            tradeData[point.x].price = tradeData[point.x].low;
+                            this.chart.xAxis[0].removePlotLine('' + point.x);
+                            this.chart.xAxis[0].addPlotLine({
+                                id: '' + point.x,
+                                color: 'green',
+                                dashStyle: 'solid',
+                                width: 3,
+                                value: point.x
+                            });
+                        } else if (tradeData[point.x].type == 'short') {
+                            tradeData[point.x] = undefined;
+                            this.chart.xAxis[0].removePlotLine('' + point.x);
+                        }
+                    }
+                };
+                break;
+            }
+        }
+<<<<<<< HEAD
+>>>>>>> add export logic
+=======
+>>>>>>> 2722c45cb35d410e37d4f8f3d3a780cea6890f36
         $(containerSelector).highcharts('StockChart', {
 			chart: {
 				events: {
