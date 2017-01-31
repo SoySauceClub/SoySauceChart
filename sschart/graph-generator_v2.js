@@ -59,9 +59,12 @@ var GraphGenerator = (function () {
 	}
 	
 <<<<<<< HEAD
+<<<<<<< HEAD
     GraphGenerator.prototype.GenerateGraph = function(containerSelector, title, seriesData, graphSetUp, numerOfPointToShow = 100) {
 		
 =======
+=======
+>>>>>>> 2722c45cb35d410e37d4f8f3d3a780cea6890f36
     GraphGenerator.prototype.GenerateGraph = function(containerSelector, title, seriesData, graphSetUp, numerOfPointToShow = 45, tradeData) {
 		for (var i = 0; i < seriesData.length; i++) {
             if (seriesData[i].type == 'ohlc') {
@@ -103,7 +106,10 @@ var GraphGenerator = (function () {
                 break;
             }
         }
+<<<<<<< HEAD
 >>>>>>> add export logic
+=======
+>>>>>>> 2722c45cb35d410e37d4f8f3d3a780cea6890f36
         $(containerSelector).highcharts('StockChart', {
 			chart: {
 				events: {
