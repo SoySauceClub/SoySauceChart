@@ -111,8 +111,9 @@ var GraphGenerator = (function () {
 					},
 					click: function(event) {
 					    console.log(this.getSelectedSeries());
-					}
-				}
+					},
+				},
+
 			},
             rangeSelector: {
                 enabled: true
@@ -134,13 +135,14 @@ var GraphGenerator = (function () {
                     text: graphSetUp.yAxis[0].title
                 },
                 scrollbar: {
-                    enabled: true
+                    enabled: false
                 },
                 lineWidth: 2,
                 tickInterval: 0.02,
-				scalable: true,
+				scalable: false,
 				offset: 50
             }],
+
 			tooltip: {
 				valueDecimals: 2,
 				enabled: true,
