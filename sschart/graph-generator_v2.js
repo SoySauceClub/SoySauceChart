@@ -57,6 +57,7 @@ var GraphGenerator = (function () {
 		alert('You are really fucked up if you reach here...');
 
 	}
+
 	
     GraphGenerator.prototype.GenerateGraph = function(containerSelector, title, seriesData, graphSetUp, numerOfPointToShow = 45, tradeData) {
 		for (var i = 0; i < seriesData.length; i++) {
@@ -107,6 +108,9 @@ var GraphGenerator = (function () {
 							seriesData[0].data[0][0],
 							seriesData[0].data[numerOfPointToShow][0]
 						);
+					},
+					click: function(event) {
+					    console.log(this.getSelectedSeries());
 					}
 				}
 			},
