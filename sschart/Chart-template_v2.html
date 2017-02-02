@@ -98,36 +98,34 @@ $(function () {
 		var data = tradesData[title];
 
 		var keys = Object.keys(data).sort();
-		var output_string = 'Datetime,Type,Price,Profit\n';
+		var output_string = 'Datetime,Type,Buy,Sell,Profit\n';
 
 		var last_type;
 		var prices = [];
-		var sum = 0;
+
 		for (var i in keys) {
 			var key = keys[i];
 			var value = data[key];
 			if (value == undefined) continue;
 			if (!last_type || last_type == value.type) {
 				prices.push(value.price);
-				output_string += (value.time + ',' + value.type + ',' + value.price + '\n');
 				last_type = value.type;
 			} else {
 				for (var j in prices) {
 					var price = prices[j];
+					var sum = 0;
 					if (value.type == 'long') {
-						sum += (price - value.price);
+						sum = (price - value.price);
 					} else {
-						sum += (value.price - price);
+						sum = (value.price - price);
 					}
-					console.log('prices', prices);
-					console.log('j', price[j]);
-					console.log('price', price);
-					console.log('value.price', value.price);
+					var date = new Date(value.time);
+					output_string += (date.toISOString().replace('T', ' ').replace('.000Z', '') + ',' + value.type + ',' + price + ',' + value.price + ',' + sum + '\n');
+					sum = 0;
 				}
 				prices = [value.price];
 				last_type = undefined;
-				output_string += (value.time + ',' + value.type + ',' + value.price + ',' + sum + '\n');
-				sum = 0;
+
 			}
 
 		}

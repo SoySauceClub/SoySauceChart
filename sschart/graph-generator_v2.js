@@ -57,6 +57,7 @@ var GraphGenerator = (function () {
 		alert('You are really fucked up if you reach here...');
 
 	}
+
 	
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -118,8 +119,12 @@ var GraphGenerator = (function () {
 							seriesData[0].data[0][0],
 							seriesData[0].data[numerOfPointToShow][0]
 						);
-					}
-				}
+					},
+					click: function(event) {
+					    console.log(this.getSelectedSeries());
+					},
+				},
+
 			},
             rangeSelector: {
                 enabled: true
@@ -141,13 +146,14 @@ var GraphGenerator = (function () {
                     text: graphSetUp.yAxis[0].title
                 },
                 scrollbar: {
-                    enabled: true
+                    enabled: false
                 },
                 lineWidth: 2,
                 tickInterval: 0.02,
-				scalable: true,
+				scalable: false,
 				offset: 50
             }],
+
 			tooltip: {
 				valueDecimals: 2,
 				enabled: true,
